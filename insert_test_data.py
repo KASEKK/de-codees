@@ -1,0 +1,3 @@
+from app import app, db
+from app.models.db.db_model import CompetenceSuggestion
+

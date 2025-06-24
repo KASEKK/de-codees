@@ -48,3 +48,5 @@ if db_connected:
     print('------------------------')
     print('Connexion db établie ✅')
     print('------------------------')
+
+    from app.routes import competence_suggestion
