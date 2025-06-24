@@ -45,8 +45,6 @@ if db_connected:
     # metadata.drop_all(bind=engine)
     metadata.create_all(bind=engine)
     
-    from app.routes import other, task
-    
     print('------------------------')
     print('Connexion db établie ✅')
     print('------------------------')
