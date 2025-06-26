@@ -31,8 +31,12 @@ class UserController(Resource):
             role=args['role']
         )
 
-        db.session.add(new_user)
-        db.session.commit()
+        try:
+            db.session.add(new_user)
+            db.session.commit()
+        except Exception as e:
+            db.session.rollback()
+            return {'message': f'Erreur lors de la création : {str(e)}'}, 500
 
         return UserSchema().dump(new_user), 201
 

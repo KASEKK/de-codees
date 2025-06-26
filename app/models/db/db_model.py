@@ -1,5 +1,6 @@
 from sqlalchemy import Column, Integer, String, Text, Boolean, ForeignKey
 from sqlalchemy.orm import declarative_base, relationship
+from sqlalchemy import CheckConstraint
 
 Base = declarative_base()
 
@@ -12,6 +13,11 @@ class User(Base):
     nom = Column(String(100))
     prenom = Column(String(100))
     role = Column(String(20), default='contributrice')  # admin / contributrice / visiteuse
+    tags = relationship("Tag", secondary="user_tag", back_populates="users")
+
+    __table_args__ = (
+    CheckConstraint("role IN ('admin', 'contributrice', 'visiteuse')", name='check_user_role'),
+    )
 
     profil = relationship('Profil', uselist=False, back_populates='user')
 
@@ -54,8 +60,12 @@ class Competence(Base):
     type = Column(String(50))  # "hard" ou "soft"
     niveau = Column(String(50))  # "débutante", etc.
 
+    __table_args__ = (
+        CheckConstraint("type IN ('hard', 'soft')", name='check_competence_type'),
+        CheckConstraint("niveau IN ('débutante', 'intermédiaire', 'avancée')", name='check_competence_niveau'),
+        )
+    
     profil = relationship('Profil', back_populates='competences')
-
 
 class CompetenceSuggestion(Base):
     __tablename__ = 'competence_suggestion'
@@ -64,12 +74,23 @@ class CompetenceSuggestion(Base):
     nom = Column(String(100), nullable=False, unique=True)
     type = Column(String(50))  # hard / soft
 
+    __table_args__ = (
+        CheckConstraint("type IN ('hard', 'soft')", name='check_suggestion_type'),
+    )
+
 class Ressource(Base):
     __tablename__ = 'ressource'
 
     id = Column(Integer, primary_key=True)
     profil_id = Column(Integer, ForeignKey('profil.id'), nullable=False)
-    type = Column(String(50))    # lien / vidéo / contact...
+    type = Column(String(50), nullable=False)
+    impact = Column(String(50), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint("type IN ('article', 'livre', 'podcast', 'vidéo', 'citation', 'mentor', 'outil', 'formation', 'autre')"),
+        CheckConstraint("impact IN ('déclencheur', 'motivation', 'technique', 'mindset', 'réseau', 'autre')"),
+    )
+
     titre = Column(String(255))
     url = Column(String(255))
     commentaire = Column(Text)
@@ -85,3 +106,16 @@ class Temoignage(Base):
     publier = Column(Boolean, default=False)
 
     profil = relationship('Profil', back_populates='temoignages')
+
+class Tag(Base):
+    __tablename__ = 'tag'
+
+    id = Column(Integer, primary_key=True)
+    nom = Column(String(200), nullable=False, unique=True)
+
+    users = relationship("User", secondary="user_tag", back_populates="tags")
+
+class UserTag(Base):
+    __tablename__ = 'user_tag'
+    user_id = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    tag_id = Column(Integer, ForeignKey('tag.id'), primary_key=True)
