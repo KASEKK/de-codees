@@ -12,3 +12,5 @@ class CompetenceSuggestionController(Resource):
             schema = CompetenceSuggestionSchema(many=True)
             serialized = schema.dump(suggestions)
         return jsonify(serialized), 200
+    
+    
