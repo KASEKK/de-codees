@@ -4,6 +4,7 @@ from werkzeug.security import generate_password_hash
 from app.models.db.db_model import User
 from app.models.dto.user.user_schema import UserSchema
 from app import db
+import re
 
 class UserController(Resource):
     def post(self):
@@ -14,12 +15,15 @@ class UserController(Resource):
         parser.add_argument('prenom', required=True)
         parser.add_argument('role', required=True, choices=('admin', 'contributrice', 'visiteuse'))
         args = parser.parse_args()
+        email_regex = r'^[\w\.-]+@[\w\.-]+\.\w+$'
+        if not re.match(email_regex, args['email']):
+            return {'message': 'Format de l’email invalide.'}, 400
 
-        # Vérification si l'utilisateur existe déjà
-        if User.query.filter_by(email=args['email']).first():
+
+        # ✔️ Remplacer ici seulement cette ligne :
+        if db.session.query(User).filter_by(email=args['email']).first():
             return {'message': 'Cet email est déjà utilisé.'}, 400
 
-        # Hash du mot de passe
         hashed_pw = generate_password_hash(args['password'])
 
         new_user = User(
@@ -60,7 +64,8 @@ class UserController(Resource):
         parser.add_argument('role')
         args = parser.parse_args()
 
-        user = User.query.filter_by(email=args['email']).first()
+        user = db.session.query(User).filter_by(email=args['email']).first()
+
         if not user:
             return {'message': 'Utilisateur non trouvé.'}, 404
 

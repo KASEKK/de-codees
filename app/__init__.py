@@ -2,22 +2,19 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_wtf.csrf import CSRFProtect
 from sqlalchemy import create_engine
-from app.config import SECRET_KEY, URL_DB
+from app.config import Config
 from sqlalchemy.exc import SQLAlchemyError
+from app.config import Config 
 
 from app.models.db.db_model import Base
 
-# Initialisation de l'application flask
+# Initialisation de l'application Flask
 app = Flask(__name__)
 
-# Mise ene place d'une session SQLalchemy
-app.config['SECRET_KEY'] = SECRET_KEY
-app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-app.config['SQLALCHEMY_DATABASE_URI'] =URL_DB
+# Chargement de la config correctement
+app.config.from_object(Config)
 
-# inistialisation de la sécurité...
 
-# Initialisation de CSRFProtect pour la protection contre les attaque CSRF
 csrf = CSRFProtect(app)
 
 # Variable pour vérifier la connexion a à la base de donnée
@@ -28,8 +25,7 @@ try:
     # Initialisation de SQLAclhemy avec l'application flask
     db = SQLAlchemy(app)
     
-    # Création d'un moteur de base de donnée SQLALchemy à partir de l'url de la base donnée
-    engine = create_engine(URL_DB)
+    engine = create_engine(Config.URL_DB)
     
     # Récupération des métadonnée de la base de donnée à partir du modèle de donnée base
     metadata = Base.metadata
