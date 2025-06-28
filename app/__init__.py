@@ -42,7 +42,7 @@ except SQLAlchemyError as e :
 
 if db_connected:
     # Permet de supprimer / recréer la base de donnée
-    metadata.drop_all(bind=engine)
+    # metadata.drop_all(bind=engine)
     metadata.create_all(bind=engine)
     
     print('------------------------')
@@ -51,4 +51,4 @@ if db_connected:
 
     from app.routes import competence_suggestion, competence, temoignage
     from app.routes import ressource, formation, profil, user
-    from app.routes import tag, user_tag
+    from app.routes import tag

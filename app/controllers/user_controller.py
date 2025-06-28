@@ -1,5 +1,4 @@
 # app/controllers/user_controller.py
-
 from flask_restful import Resource, reqparse
 from werkzeug.security import generate_password_hash
 from app.models.db.db_model import User
@@ -42,10 +41,11 @@ class UserController(Resource):
 
     def get(self):
         parser = reqparse.RequestParser()
-        parser.add_argument('email', required=True)
+        parser.add_argument('email', location='args', required=True)
         args = parser.parse_args()
 
-        user = User.query.filter_by(email=args['email']).first()
+        user = db.session.query(User).filter_by(email=args['email']).first()
+
         if not user:
             return {'message': 'Utilisateur non trouvé.'}, 404
 
